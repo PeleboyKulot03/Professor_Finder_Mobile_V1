@@ -1,0 +1,10 @@
+<resources>
+    <string name="app_name">Professor Finder</string>
+    <string-array name="marks">
+        <item>Pending</item>
+        <item>Class Ongoing</item>
+        <item>No Teacher</item>
+        <item>Early Dismissal</item>
+        <item>Late</item>
+    </string-array>
+</resources>
