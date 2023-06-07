@@ -16,6 +16,7 @@ public class ProfessorModel {
     private String roomLocation;
 
     private String time;
+    private String comment;
     private String state;
     private String isPresent;
     private String startTime;
@@ -37,7 +38,7 @@ public class ProfessorModel {
         this.state = state;
     }
 
-    public ProfessorModel(String name, String image, String roomLocation, String isPresent, String idNumber, String startTime, String endTime) {
+    public ProfessorModel(String name, String image, String roomLocation, String isPresent, String idNumber, String startTime, String endTime, String comment) {
         this.name = name;
         this.image = image;
         this.roomLocation = roomLocation;
@@ -45,7 +46,12 @@ public class ProfessorModel {
         this.idNumber = idNumber;
         this.startTime = startTime;
         this.endTime = endTime;
+        this.comment = comment;
 
+    }
+
+    public String getComment() {
+        return comment;
     }
 
     public String getIdNumber() {
@@ -101,7 +107,7 @@ public class ProfessorModel {
                     String roomLocation = rs.getString("roomLocation");
                     String isPresent = rs.getString("isPresent");
                     String idNumber = rs.getString("idNumber");
-                    ProfessorModel model = new ProfessorModel(name, "", roomLocation, isPresent, idNumber, "", "");
+                    ProfessorModel model = new ProfessorModel(name, "", roomLocation, isPresent, idNumber, "", "", "");
                     models.add(model);
                     Log.i("TAG", "getData: " + model.getData());
                 }

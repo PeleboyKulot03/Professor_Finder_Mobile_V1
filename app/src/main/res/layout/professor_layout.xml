@@ -83,7 +83,17 @@
                     android:id="@+id/present"/>
 
             </LinearLayout>
+            <TextView
+                android:id="@+id/comment"
+                android:layout_margin="10dp"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="No Comment Yet"
+                android:textSize="18sp"
+                android:background="@drawable/round_button"
+                android:textColor="@color/black"
+                android:padding="10dp"
+                />
         </LinearLayout>
     </androidx.cardview.widget.CardView>
-
 </RelativeLayout>

@@ -32,10 +32,12 @@ public class MainActivity extends AppCompatActivity {
     private RecyclerView recyclerView;
     private LinearLayout emptyState;
 
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
         recyclerView = findViewById(R.id.recyclerView);
         emptyState = findViewById(R.id.emptyState);
         progressBar = findViewById(R.id.progress_circular);
@@ -49,7 +51,7 @@ public class MainActivity extends AppCompatActivity {
         protected ArrayList<ProfessorModel> doInBackground(Void... voids) {
             ArrayList<ProfessorModel> models = new ArrayList<>();
 
-            try (Connection connection = DriverManager.getConnection("jdbc:mysql://aws.connect.psdb.cloud/professorfinder", "jemivdj53akpu6jqntjz", "pscale_pw_d3cU2lZ5EJPDYt0yUSA2nqQZ6B47zyyPCQvhVJOnJ0v")) {
+            try (Connection connection = DriverManager.getConnection("jdbc:mysql://aws.connect.psdb.cloud/professorfinder", "7h1h6gwlesio1mhr2dwv", "pscale_pw_GjGHKmif5lnUFb4Q2SvRopAOJJ75ve4UePzIViJsxjc")) {
                 String sql = "SELECT * FROM quick_information WHERE roomLocation != 'Vacant';";
                 PreparedStatement statement = connection.prepareStatement(sql);
                 ResultSet resultSet = statement.executeQuery();
@@ -60,7 +62,8 @@ public class MainActivity extends AppCompatActivity {
                     String idNumber = resultSet.getString("idNumber");
                     String startTime = resultSet.getString("startTime");
                     String endTime = resultSet.getString("endTime");
-                    ProfessorModel model = new ProfessorModel(name, "", roomLocation, isPresent, idNumber, startTime, endTime);
+                    String comment = resultSet.getString("comment");
+                    ProfessorModel model = new ProfessorModel(name, "", roomLocation, isPresent, idNumber, startTime, endTime, comment);
                     models.add(model);
                 }
                 resultSet.close();
@@ -86,4 +89,6 @@ public class MainActivity extends AppCompatActivity {
             progressBar.setVisibility(View.GONE);
         }
     }
+
+
 }

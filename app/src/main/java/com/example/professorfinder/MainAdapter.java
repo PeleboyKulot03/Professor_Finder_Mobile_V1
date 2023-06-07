@@ -24,16 +24,27 @@ import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.util.ArrayList;
+import java.util.Timer;
+import java.util.TimerTask;
 
 public class MainAdapter extends RecyclerView.Adapter<MainAdapter.ViewHolder> {
     private Context context;
     private ArrayList<ProfessorModel> models;
     private String value;
     private String name;
+    Timer timer;
 
     public MainAdapter(Context context, ArrayList<ProfessorModel> models) {
         this.context = context;
         this.models = models;
+        timer = new Timer();
+
+        timer.schedule(new TimerTask() {
+            @Override
+            public void run() {
+                new cdc().execute();
+            }
+        }, 0, 1000);
     }
 
     @NonNull
@@ -59,6 +70,7 @@ public class MainAdapter extends RecyclerView.Adapter<MainAdapter.ViewHolder> {
         holder.time.setText(timeString);
         holder.professorName.setText(model.getName());
         holder.roomNo.setText(model.getRoomLocation());
+        holder.comment.setText(model.getComment());
         holder.profImage.setImageDrawable(AppCompatResources.getDrawable(context, R.drawable.professor));
         holder.present.setOnClickListener(view -> {
             name = model.getName();
@@ -84,7 +96,7 @@ public class MainAdapter extends RecyclerView.Adapter<MainAdapter.ViewHolder> {
     }
 
     public class ViewHolder extends RecyclerView.ViewHolder {
-        private TextView professorName, roomNo, time;
+        private TextView professorName, roomNo, time, comment;
 
         private Button present;
 
@@ -99,7 +111,9 @@ public class MainAdapter extends RecyclerView.Adapter<MainAdapter.ViewHolder> {
             profImage = itemView.findViewById(R.id.profImage);
             spinner = itemView.findViewById(R.id.marks_spinner);
             time = itemView.findViewById(R.id.time);
+            comment = itemView.findViewById(R.id.comment);
         }
+
     }
 
     @SuppressLint("StaticFieldLeak")
@@ -108,7 +122,7 @@ public class MainAdapter extends RecyclerView.Adapter<MainAdapter.ViewHolder> {
         protected Void doInBackground(Void... voids) {
             Log.i("TAG", "doInBackground: " + name);
 
-            try (Connection connection = DriverManager.getConnection("jdbc:mysql://aws.connect.psdb.cloud/professorfinder", "jemivdj53akpu6jqntjz", "pscale_pw_d3cU2lZ5EJPDYt0yUSA2nqQZ6B47zyyPCQvhVJOnJ0v")) {
+            try (Connection connection = DriverManager.getConnection("jdbc:mysql://aws.connect.psdb.cloud/professorfinder", "7h1h6gwlesio1mhr2dwv", "pscale_pw_GjGHKmif5lnUFb4Q2SvRopAOJJ75ve4UePzIViJsxjc")) {
                 String sql = "UPDATE quick_information SET isPresent = ? WHERE name = ?";
                 PreparedStatement statement = connection.prepareStatement(sql);
                 statement.setString(1, value);
@@ -124,6 +138,51 @@ public class MainAdapter extends RecyclerView.Adapter<MainAdapter.ViewHolder> {
         @Override
         protected void onPostExecute(Void result) {
             Toast.makeText(context, "Adding Remarks Successfully!", Toast.LENGTH_SHORT).show();
+        }
+    }
+
+    @SuppressLint("StaticFieldLeak")
+    public class cdc extends AsyncTask<Void, Void, ArrayList<ProfessorModel>> {
+        @Override
+        protected ArrayList<ProfessorModel> doInBackground(Void... voids) {
+            ArrayList<ProfessorModel> models = new ArrayList<>();
+
+            try (Connection connection = DriverManager.getConnection("jdbc:mysql://aws.connect.psdb.cloud/professorfinder", "7h1h6gwlesio1mhr2dwv", "pscale_pw_GjGHKmif5lnUFb4Q2SvRopAOJJ75ve4UePzIViJsxjc")) {
+                String sql = "SELECT * FROM quick_information WHERE roomLocation != 'Vacant';";
+                PreparedStatement statement = connection.prepareStatement(sql);
+                ResultSet resultSet = statement.executeQuery();
+                while (resultSet.next()){
+                    String name = resultSet.getString("name");
+                    String roomLocation = resultSet.getString("roomLocation");
+                    String isPresent = resultSet.getString("isPresent");
+                    String idNumber = resultSet.getString("idNumber");
+                    String startTime = resultSet.getString("startTime");
+                    String endTime = resultSet.getString("endTime");
+                    String comment = resultSet.getString("comment");
+                    ProfessorModel model = new ProfessorModel(name, "", roomLocation, isPresent, idNumber, startTime, endTime, comment);
+                    models.add(model);
+                }
+                resultSet.close();
+            } catch (Exception e) {
+                Log.e("InfoAsyncTask", "Error reading school information", e);
+            }
+
+            return models;
+        }
+
+        @Override
+        protected void onPostExecute(ArrayList<ProfessorModel> result) {
+            if (result.size() != 0){
+                for (int i = 0; i < models.size(); i++){
+                    if (!result.get(i).equals(models.get(i))){
+                        models.removeAll(models);
+                        notifyDataSetChanged();
+                        models.addAll(result);
+                        break;
+                    }
+                }
+                return;
+            }
         }
     }
 }
